@@ -1,0 +1,5 @@
+(define (problem g6) (:domain graph-connectivity)
+  (:objects n1 n2 n3 n4 n5 n6 - node)
+  (:init (link n1 n2) (link n2 n3) (link n3 n4) (link n4 n5)
+         (link n5 n6) (link n6 n1) (link n1 n4))
+  (:goal (connected)))
