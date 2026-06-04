@@ -1,0 +1,94 @@
+{
+    "V": [
+        "S1",
+        "S2",
+        "S3",
+        "S4",
+        "S5",
+        "S6",
+        "P7",
+        "P8"
+    ],
+    "TYPE": {
+        "S1": "S",
+        "S2": "S",
+        "S3": "S",
+        "S4": "S",
+        "S5": "S",
+        "S6": "S",
+        "P7": "P",
+        "P8": "P"
+    },
+    "E": [
+        "S1-P7",
+        "S2-P7",
+        "S4-P7",
+        "S6-P7",
+        "S1-P8",
+        "S2-P8",
+        "S5-P8",
+        "S6-P8",
+        "S1-S3",
+        "S2-S5",
+        "S3-S4"
+    ],
+    "sigma": {
+        "S1-P7": true,
+        "S2-P7": true,
+        "S4-P7": true,
+        "S6-P7": true,
+        "S5-P8": true,
+        "S1-S3": true,
+        "S1-P8": false,
+        "S2-P8": false,
+        "S6-P8": false,
+        "S2-S5": false,
+        "S3-S4": false
+    },
+    "full": {
+        "S1": true,
+        "S2": true,
+        "S3": false,
+        "S4": false,
+        "S5": false,
+        "S6": false,
+        "P7": false,
+        "P8": false
+    },
+    "Estar": [
+        "S1-P7",
+        "S2-P7",
+        "S4-P7",
+        "S6-P7",
+        "S1-P8",
+        "S2-P8",
+        "S4-P8",
+        "S5-P8",
+        "S6-P8",
+        "S1-S3",
+        "S2-S5",
+        "S3-S4",
+        "S3-S6"
+    ],
+    "sigmaStar": {
+        "S1-P7": true,
+        "S2-P7": true,
+        "S4-P7": true,
+        "S5-P8": true,
+        "S6-P8": true,
+        "S1-S3": true,
+        "S6-P7": false,
+        "S1-P8": false,
+        "S2-P8": false,
+        "S4-P8": false,
+        "S2-S5": false,
+        "S3-S4": false,
+        "S3-S6": false
+    },
+    "BUILDABLE": [
+        "S4-P8",
+        "S3-S6"
+    ],
+    "REMOVABLE": [],
+    "MUTABLE": {}
+}
