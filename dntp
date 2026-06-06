@@ -1,0 +1,90 @@
+#!/usr/bin/env bash
+# Uso:
+#   ./dntp -singolo <istanza>  [-enc <encoding.lp>]
+#   ./dntp -multiplo           [-enc <encoding.lp>]   # istanze reali P*
+#   ./dntp -sint    [prefisso] [-enc <encoding.lp>]   # sintetiche N_* (prefisso opz, es N_8)
+# Default encoding: ASP/dntp/full.lp. Facts generati al volo in /tmp, poi cancellati.
+set -euo pipefail
+
+HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+FD="$HERE/FastDownward"
+DOM="$HERE/ASP/dntp/domain_dntp.pddl"
+INSTDIR="$HERE/FULLDOMAIN+INSTANCES/06_domain_RAD_RESTORE_primary_edge"
+SEARCH="lazy_greedy([ff()])"
+ENC="$HERE/ASP/dntp/full.lp"
+TIMEOUT=600
+export LD_LIBRARY_PATH="/home/lollo/clingo-system/lib:${LD_LIBRARY_PATH:-}"
+
+MODE="${1:-}"; shift || true
+ARG=""
+while [ $# -gt 0 ]; do
+  case "$1" in
+    -enc) ENC="$2"; shift 2 ;;
+    *)    ARG="$1"; shift ;;
+  esac
+done
+[ -f "$ENC" ] || { echo "ERRORE: encoding non trovato: $ENC"; exit 1; }
+
+gen_facts () {
+python3 - "$1" << 'PY'
+import json, re, sys
+d = json.load(open(sys.argv[1]))
+V, TYPE, E = d['V'], d['TYPE'], d['E']
+BUILD=set(d.get('BUILDABLE',[])); REMOV=set(d.get('REMOVABLE',[]))
+M=d.get('MUTABLE',{}); MUT=set(M.keys() if isinstance(M,dict) else M)
+dyn=BUILD|REMOV|MUT
+low=lambda n:n.lower(); idx=lambda n:int(re.sub(r'\D','',n) or 0)
+sec=lambda n:str(TYPE[n]).upper().startswith('S')
+order=sorted([n for n in V if sec(n)],key=idx)+sorted([n for n in V if not sec(n)],key=idx)
+def canon(a,b):
+    ra=(0 if sec(a) else 1,idx(a)); rb=(0 if sec(b) else 1,idx(b))
+    return (a,b) if ra<rb else (b,a)
+sc=[]
+for e in E:
+    a,b=e.split('-')
+    if e in dyn: continue
+    x,y=canon(a,b); sc.append(f"conn({low(x)},{low(y)}).")
+out=[]
+out.append(" ".join(f"node({low(n)})." for n in order))
+out.append(" ".join(f"secondary({low(n)})." for n in order if sec(n)))
+out.append(" ".join(f"primary({low(n)})." for n in order if not sec(n)))
+le=[f"le({low(order[i])},{low(order[j])})." for i in range(len(order)) for j in range(i+1,len(order))]
+for k in range(0,len(le),8): out.append(" ".join(le[k:k+8]))
+out.append(" ".join(sc))
+print("\n".join(out))
+PY
+}
+
+run_one () {
+    local pddl="$1" json="${1%.pddl}.json"
+    [ -f "$json" ] || { printf "%-55s | JSON mancante\n" "$(basename "$pddl" .pddl)"; return 0; }
+    local tmp; tmp="$(mktemp /tmp/dntp_XXXX.facts)"
+    trap 'rm -f "$tmp"' RETURN
+    if ! gen_facts "$json" > "$tmp" 2>/dev/null; then
+        printf "%-55s | facts ERR\n" "$(basename "$pddl" .pddl)"; return 0
+    fi
+    export DNTP_EVAL="$ENC" DNTP_FACTS="$tmp"
+    ( cd "$FD" && rm -f sas_plan && timeout "$TIMEOUT" ./fast-downward.py "$DOM" "$pddl" --search "$SEARCH" >/tmp/dntp_run.log 2>&1 ) || true
+    if grep -q "Solution found" /tmp/dntp_run.log; then
+        local pl tm; pl=$(grep -c '^(' "$FD/sas_plan"); tm=$(grep -oE "Total time: [0-9.]+s" /tmp/dntp_run.log|tail -1|grep -oE "[0-9.]+")
+        printf "%-55s | piano %-4s | %ss\n" "$(basename "$pddl" .pddl)" "$pl" "$tm"
+    else
+        printf "%-55s | NO SOLUTION / timeout\n" "$(basename "$pddl" .pddl)"
+    fi
+}
+
+echo "encoding: $ENC"
+case "$MODE" in
+  -singolo)
+    [ -n "$ARG" ] || { echo "serve il nome istanza"; exit 1; }
+    I="$ARG"; [[ "$I" == *.pddl ]] || I="$INSTDIR/$I.pddl"
+    [ -f "$I" ] || I="$INSTDIR/$(basename "$I")"
+    run_one "$I"; echo; echo "=== piano ==="; cat "$FD/sas_plan" 2>/dev/null || echo "(nessuno)" ;;
+  -multiplo)
+    for f in "$INSTDIR"/P*.pddl; do run_one "$f"; done ;;
+  -sint)
+    pat="${ARG:-N_}"
+    for f in "$INSTDIR"/${pat}*.pddl; do run_one "$f"; done ;;
+  *)
+    echo "Uso: $0 -singolo <istanza> [-enc E] | -multiplo [-enc E] | -sint [prefisso] [-enc E]"; exit 1 ;;
+esac

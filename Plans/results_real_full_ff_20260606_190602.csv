@@ -1,0 +1,12 @@
+istanza,N,alpha,piano,espansi,valutati,tempo_s,esito
+P06,; N=,; AL=,7,8,9,0.010146,OK
+P10,; N=; N=,; AL=; AL=,22,69,70,0.101353,OK
+P13,; N=; N=; N=,; AL=; AL=; AL=,15,183,184,0.232238,OK
+P16,; N=; N=; N=; N=,; AL=; AL=; AL=; AL=,21,90,91,0.174994,OK
+P22,; N=; N=; N=; N=; N=,; AL=; AL=; AL=; AL=; AL=,30,51,52,0.146221,OK
+P30,; N=; N=; N=; N=; N=; N=,; AL=; AL=; AL=; AL=; AL=; AL=,35,111,112,0.483534,OK
+P40,; N=; N=; N=; N=; N=; N=; N=,; AL=; AL=; AL=; AL=; AL=; AL=; AL=,59,236,237,1.891099,OK
+P50,; N=; N=; N=; N=; N=; N=; N=; N=,; AL=; AL=; AL=; AL=; AL=; AL=; AL=; AL=,108,1802,1803,22.336757,OK
+P68,; N=; N=; N=; N=; N=; N=; N=; N=; N=,; AL=; AL=; AL=; AL=; AL=; AL=; AL=; AL=; AL=,93,1688,1689,35.116860,OK
+P100,; N=; N=; N=; N=; N=; N=; N=; N=; N=; N=,; AL=; AL=; AL=; AL=; AL=; AL=; AL=; AL=; AL=; AL=,8,9,10,0.410991,OK
+P150,; N=; N=; N=; N=; N=; N=; N=; N=; N=; N=; N=,; AL=; AL=; AL=; AL=; AL=; AL=; AL=; AL=; AL=; AL=; AL=,32,377,378,36.206348,OK
