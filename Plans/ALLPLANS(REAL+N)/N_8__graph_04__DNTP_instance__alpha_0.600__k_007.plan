@@ -1,0 +1,8 @@
+(insp s6 p8)
+(inss s3 s5)
+(dels s3 s4)
+(insp s3 p7)
+(sw s2 p7 p8)
+(sw s6 p7 s5)
+(sw s5 p8 s3)
+; cost = 7 (unit cost)

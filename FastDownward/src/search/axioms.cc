@@ -269,8 +269,8 @@ void AxiomEvaluator::clingo_override(vector<int> &state) {
 
     auto it = eval_cache.find(ckey);
     if (it == eval_cache.end()) {
-        set<string> got;
         bool sat = false;
+        bool error = false;
         try {
             Clingo::Control ctl{};
             string prog = eval_lp_text + "\n" + static_facts + "\n"
@@ -278,27 +278,20 @@ void AxiomEvaluator::clingo_override(vector<int> &state) {
             ctl.add("base", {}, prog.c_str());
             ctl.ground({{"base", {}}});
             for (auto &m : ctl.solve()) {
+                (void)m;
                 sat = true;
-                for (auto &sym : m.symbols(Clingo::ShowType::Shown))
-                    got.insert(sym.name());
                 break;
-            }
-            if (!sat) {
-                cerr << "[clingo] UNSAT inatteso, NON poto. facts=" << facts << endl;
-                for (auto &g : gate_var)
-                    got.insert(g.first);
             }
         } catch (const exception &ex) {
             cerr << "[clingo] errore (" << ex.what() << "), NON poto." << endl;
-            for (auto &g : gate_var)
-                got.insert(g.first);
+            error = true;
         }
-        it = eval_cache.emplace(ckey, move(got)).first;
+        it = eval_cache.emplace(ckey, sat || error).first;
     }
 
-    const set<string> &truth = it->second;
+    bool valid = it->second;
     for (const auto &g : gate_var)
-        state[g.second] = truth.count(g.first) ? 0 : 1;
+        state[g.second] = valid ? 0 : 1;
 }
 
 PerTaskInformation<AxiomEvaluator> g_axiom_evaluators;

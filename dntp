@@ -11,7 +11,7 @@ FD="$HERE/FastDownward"
 DOM="$HERE/ASP/dntp/domain_dntp.pddl"
 INSTDIR="$HERE/FULLDOMAIN+INSTANCES/06_domain_RAD_RESTORE_primary_edge"
 SEARCH="lazy_greedy([ff()])"
-ENC="$HERE/ASP/dntp/full.lp"
+ENC="$HERE/ASP/dntp/fullSAT.lp"
 TIMEOUT=600
 export LD_LIBRARY_PATH="/home/lollo/clingo-system/lib:${LD_LIBRARY_PATH:-}"
 

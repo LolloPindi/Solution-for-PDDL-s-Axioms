@@ -55,7 +55,7 @@ class AxiomEvaluator {
     std::string eval_lp_text;
     std::string static_facts;
     std::string auto_facts;   
-    std::unordered_map<std::string, std::set<std::string>> eval_cache;
+    std::unordered_map<std::string, bool> eval_cache;
 
     void clingo_init(const TaskProxy &task_proxy);
     void clingo_override(std::vector<int> &state);

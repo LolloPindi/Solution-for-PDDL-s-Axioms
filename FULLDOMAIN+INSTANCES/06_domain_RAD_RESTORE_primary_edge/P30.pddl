@@ -63,8 +63,6 @@
 	(close S28 P31)
 	(close S28 S29)
 	(close S30 P32)
-	(full P31)
-	(full P32)
 	(buildable S11 P32)
 	(buildable S12 S26)
 	(buildable S14 S16)

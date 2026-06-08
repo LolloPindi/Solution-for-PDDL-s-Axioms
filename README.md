@@ -100,8 +100,8 @@ You can choose the search algorithm and encoding:
 ./dntp_run --N N_22 --to 120            # timeout di 120s invece di 600
 ```
 
-The available algorithms are `ff` (default), `eager_ff`, `astar`, `astar_ff`,
-`wastar`, `blind`. The encodings are `full` (default), `rad`, `rest_p`,
+The available algorithms are `ff` (default), `eager_ff`, `eager_pref`, `lama`, `astar`, `astar_ff`, `wastar`, `blind`.
+The encodings are `full` (default), `rad`, `rest_p`,
 `rest_e`, `rad_rest_p`, You can also choose a lp file `.lp`.
 
 Each run prints a table (instance, plan length, evaluated states,

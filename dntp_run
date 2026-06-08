@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# dntp_run - interfaccia per il sistema DNTP (FD + bridge ASP/Clingo)
+
 set -uo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -25,6 +25,8 @@ mkdir -p "$PLANS"
 search_config () {
   case "$1" in
     ff|greedy|gready)   echo "lazy_greedy([ff()])" ;;
+    lama|lama_first)    echo "__ALIAS__" ;;
+    eager_pref)         echo "eager_greedy([ff()], preferred=[ff()])" ;;
     eager_ff)           echo "eager_greedy([ff()])" ;;
     astar|Astar|a*)     echo "astar(blind())" ;;
     astar_ff)           echo "astar(ff())" ;;
@@ -37,7 +39,7 @@ search_config () {
 
 enc_file () {
   case "$1" in
-    full|"")     echo "$ENCDIR/full.lp" ;;
+    full|"")     echo "$ENCDIR/fullSAT.lp" ;;
     rad)         echo "$ENCDIR/rad.lp" ;;
     rest_p)      echo "$ENCDIR/rest_p.lp" ;;
     rest_e)      echo "$ENCDIR/rest_e.lp" ;;
@@ -69,7 +71,7 @@ I piani trovati sono salvati in: $PLANS/
 USAGE
 }
 
-# --- parsing ---
+#parsing
 SET=""; TARGET=""; ENCN="full"; SEARCHN="ff"; LIST=0
 ARGS=("$@")
 i=0
@@ -89,7 +91,7 @@ while [ $i -lt ${#ARGS[@]} ]; do
   i=$((i+1))
 done
 
-# --- lista istanze ---
+#lista istanze
 if [ $LIST -eq 1 ]; then
   if [ "$SET" != "N" ]; then echo ""; ls "$INSTDIR"/P*.pddl 2>/dev/null | xargs -n1 basename | sed 's/.pddl//' | sort -V; fi
   if [ "$SET" != "real" ]; then echo ""; ls "$INSTDIR"/N_*.pddl 2>/dev/null | xargs -n1 basename | sed 's/.pddl//'; fi
@@ -102,7 +104,7 @@ ENC="$(enc_file "$ENCN")"
 SEARCH="$(search_config "$SEARCHN")"
 [ -z "$SEARCH" ] && { echo "ERRORE: ricerca sconosciuta '$SEARCHN' (ff|eager_ff|astar|astar_ff|wastar|blind)"; exit 1; }
 
-# --- raccogli la lista di file da eseguire ---
+#lista file
 FILES=()
 if [ "$SET" = "real" ]; then
   if [ "$TARGET" = "-all" ] || [ -z "$TARGET" ]; then
@@ -125,13 +127,13 @@ fi
 # --- CSV ---
 STAMP="$(date +%Y%m%d_%H%M%S)"
 CSV="$PLANS/results_${SET}_${ENCN}_${SEARCHN}_${STAMP}.csv"
-echo "istanza,N,alpha,piano,espansi,valutati,tempo_s,esito" > "$CSV"
+echo "istanza,N,E,alpha,piano,espansi,valutati,tempo_s,esito" > "$CSV"
 
 echo "encoding: $ENC"
 echo "ricerca : $SEARCH  ($SEARCHN)"
 echo "timeout : ${TIMEOUT}s   |   piani in: $PLANS"
 echo
-printf "%-50s | %-5s | %-9s | %-8s | %s\n" "istanza" "piano" "valutati" "tempo" "esito"
+printf "%-46s | %-3s | %-3s | %-5s | %-5s | %-9s | %-8s | %s\n" "istanza" "N" "E" "alpha" "piano" "valutati" "tempo" "esito"
 printf -- "---------------------------------------------------+-------+-----------+----------+--------\n"
 
 gen_facts () {
@@ -161,16 +163,22 @@ PY
 for pddl in "${FILES[@]}"; do
   name="$(basename "$pddl" .pddl)"
   json="${pddl%.pddl}.json"
-  N="$(echo "$name" | grep -oE 'N_[0-9]+' | grep -oE '[0-9]+'); N=${N:-}"
-  AL="$(echo "$name" | grep -oE 'alpha_[0-9.]+' | grep -oE '[0-9.]+'); AL=${AL:-}"
+  E_count="$(python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); norm=lambda S:set(tuple(sorted(x.split("-"))) for x in S); print(len(norm(d["E"])|norm(d.get("Estar",[]))))' "$json" 2>/dev/null || echo "?")"
+  N="$(python3 -c 'import json,sys; print(len(json.load(open(sys.argv[1]))["V"]))' "$json" 2>/dev/null || echo "?")"
+  AL="$(echo "$name" | grep -oE 'alpha_[0-9.]+' | head -1 | grep -oE '[0-9.]+')"
+  [ -z "$AL" ] && AL="-"
   if [ ! -f "$pddl" ] || [ ! -f "$json" ]; then
-    printf "%-50s | %-5s | %-9s | %-8s | %s\n" "$name" "-" "-" "-" "MANCANTE"
-    echo "$name,$N,$AL,-,-,-,-,MANCANTE" >> "$CSV"; continue
+    printf "%-46s | %-3s | %-3s | %-5s | %-5s | %-9s | %-8s | %s\n" "$name" "$N" "$E_count" "$AL" "-" "-" "-" "MANCANTE"
+    echo "$name,$N,$E_count,$AL,-,-,-,-,MANCANTE" >> "$CSV"; continue
   fi
   tmp="$(mktemp /tmp/dntp_XXXX.facts)"
   gen_facts "$json" > "$tmp"
   export DNTP_EVAL="$ENC" DNTP_FACTS="$tmp"
-  ( cd "$FD" && rm -f sas_plan && timeout "$TIMEOUT" ./fast-downward.py "$DOM" "$pddl" --search "$SEARCH" >/tmp/dntp_run.log 2>&1 )
+  if [ "$SEARCH" = "__ALIAS__" ]; then
+    ( cd "$FD" && rm -f sas_plan && timeout "$TIMEOUT" ./fast-downward.py --alias lama-first "$DOM" "$pddl" >/tmp/dntp_run.log 2>&1 )
+  else
+    ( cd "$FD" && rm -f sas_plan && timeout "$TIMEOUT" ./fast-downward.py "$DOM" "$pddl" --search "$SEARCH" >/tmp/dntp_run.log 2>&1 )
+  fi
   rc=$?
   if grep -q "Solution found" /tmp/dntp_run.log; then
     pl=$(grep -c '^(' "$FD/sas_plan")
@@ -178,12 +186,12 @@ for pddl in "${FILES[@]}"; do
     ex=$(grep -oE "Expanded [0-9]+ state" /tmp/dntp_run.log|tail -1|grep -oE "[0-9]+")
     ev=$(grep -oE "Evaluated [0-9]+ state" /tmp/dntp_run.log|tail -1|grep -oE "[0-9]+")
     cp "$FD/sas_plan" "$PLANS/${name}.plan"
-    printf "%-50s | %-5s | %-9s | %-8s | %s\n" "$name" "$pl" "$ev" "$tm" "OK"
-    echo "$name,$N,$AL,$pl,$ex,$ev,$tm,OK" >> "$CSV"
+    printf "%-46s | %-3s | %-3s | %-5s | %-5s | %-9s | %-8s | %s\n" "$name" "$N" "$E_count" "$AL" "$pl" "$ev" "$tm" "OK"
+    echo "$name,$N,$E_count,$AL,$pl,$ex,$ev,$tm,OK" >> "$CSV"
   else
     if [ $rc -eq 124 ]; then es="TIMEOUT"; else es="NO-SOL/ERR"; fi
-    printf "%-50s | %-5s | %-9s | %-8s | %s\n" "$name" "-" "-" "-" "$es"
-    echo "$name,$N,$AL,-,-,-,-,$es" >> "$CSV"
+    printf "%-46s | %-3s | %-3s | %-5s | %-5s | %-9s | %-8s | %s\n" "$name" "$N" "$E_count" "$AL" "-" "-" "-" "$es"
+    echo "$name,$N,$E_count,$AL,-,-,-,-,$es" >> "$CSV"
   fi
   rm -f "$tmp"
 done

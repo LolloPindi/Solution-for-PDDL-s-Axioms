@@ -1,0 +1,6 @@
+(inss s3 s15)
+(sw s10 p17 p18)
+(sw s5 s9 s16)
+(sw s2 s6 s15)
+(sw s16 s8 s1)
+; cost = 5 (unit cost)

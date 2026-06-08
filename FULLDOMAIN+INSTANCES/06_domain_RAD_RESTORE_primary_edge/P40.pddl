@@ -87,8 +87,6 @@
 	(close S36 S37)
 	(close S38 S41)
 	(close S39 P43)
-	(full P43)
-	(full P44)
 	(buildable S5 S13)
 	(buildable S7 S22)
 	(buildable S7 S26)
