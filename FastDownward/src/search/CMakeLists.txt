@@ -604,6 +604,35 @@ if(USE_LP)
 endif()
 
 create_fast_downward_library(
+    NAME asp_solver
+    HELP "ASP-based heuristics"
+    SOURCES
+        heuristics/asp_heuristic
+    DEPENDS
+        heuristics        
+        search             
+        task_properties
+)if(USE_ASP)
+    find_package(Clingo REQUIRED)
+    if (CLINGO_FOUND)
+        if(TARGET libclingo)
+            set(CLINGO_TGT libclingo)
+        elseif(TARGET clingo)
+            set(CLINGO_TGT clingo)
+        elseif(TARGET Clingo::libclingo)
+            set(CLINGO_TGT Clingo::libclingo)
+        endif()
+
+        target_link_libraries(asp_solver PRIVATE ${CLINGO_TGT})
+        target_compile_definitions(asp_solver PRIVATE HAS_ASP)
+        target_sources(asp_solver PRIVATE heuristics/asp_heuristic.h heuristics/asp_heuristic.cc)
+    else()
+        message(FATAL_ERROR "Clingo not found.")
+    endif()
+endif()
+
+
+create_fast_downward_library(
     NAME relaxation_heuristic
     HELP "The base class for relaxation heuristics"
     SOURCES
@@ -990,21 +1019,3 @@ create_fast_downward_library(
         algorithms/sccs
     DEPENDENCY_ONLY
 )
-
-# ===== Clingo =====
-find_package(Clingo REQUIRED)
-if(TARGET libclingo)
-    set(CLINGO_TGT libclingo)
-elseif(TARGET clingo)
-    set(CLINGO_TGT clingo)
-elseif(TARGET Clingo::libclingo)
-    set(CLINGO_TGT Clingo::libclingo)
-else()
-    message(FATAL_ERROR "Target Clingo non trovato in ClingoConfig")
-endif()
-get_target_property(CLINGO_INC ${CLINGO_TGT} INTERFACE_INCLUDE_DIRECTORIES)
-if(CLINGO_INC)
-    include_directories(${CLINGO_INC})
-endif()
-target_link_libraries(downward PRIVATE ${CLINGO_TGT})
-# ===========================================
