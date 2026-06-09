@@ -7,6 +7,9 @@ from translate import normalize
 from translate import pddl
 from translate import timers
 
+#TODO[asp] change variable location?
+ASP_TYPES_FILENAME = "instance_types.lp"
+
 class PrologProgram:
     def __init__(self):
         self.facts = []
@@ -149,6 +152,19 @@ def translate_typed_object(prog, obj, type_dict):
 
 def translate_facts(prog, task):
     type_dict = {type.name: type for type in task.types}
+
+    #TODO[asp] there is some code repetition. Check if refactoring is necessary.
+    with open(ASP_TYPES_FILENAME, "w") as asp_obj_file:
+        for obj in task.objects:
+            supertypes = type_dict[obj.type_name].supertype_names
+            for type_name in [obj.type_name] + supertypes:
+                # perform some renaming TODO[asp] check if it's possible to put somwhere else (or if it's necessary!)
+                safe_type = type_name.replace('-', '_').lower()
+                safe_obj = obj.name.replace('-', '_').lower()
+            
+                asp_obj_file.write(f"{safe_type}({safe_obj}).\n")
+    ### end of ASP.
+
     for obj in task.objects:
         translate_typed_object(prog, obj, type_dict)
     for fact in task.init:
