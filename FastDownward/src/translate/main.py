@@ -42,6 +42,9 @@ from translate.options import get_options
 
 DEBUG = False
 
+#TODO[asp] change variable location?
+ASP_STATIC_FACTS_FILENAME = "instance_static_facts.lp"
+
 simplified_effect_condition_counter = 0
 added_implied_precondition_counter = 0
 
@@ -605,6 +608,35 @@ def pddl_to_sas(task):
             variable_order.find_and_apply_variable_order(
                 sas_task, get_options().reorder_variables,
                 get_options().filter_unimportant_vars)
+
+    # TODO[asp] there is some refactoring to do here (maybe define two helper functions to make this code part lighter)
+    fdr_dynamic_atoms = set()
+    for var_values in translation_key:
+        for val_name in var_values:
+            if val_name.startswith("Atom "):
+                clean_atom = val_name[5:].replace(" ", "").lower().replace("-", "_")
+                fdr_dynamic_atoms.add(clean_atom)
+            elif val_name.startswith("NegatedAtom "):
+                clean_atom = val_name[12:].replace(" ", "").lower().replace("-", "_")
+                fdr_dynamic_atoms.add(clean_atom)
+
+    with open(ASP_STATIC_FACTS_FILENAME, "w") as asp_static_file:        
+        for fact in task.init:
+            if isinstance(fact, pddl.Atom):
+                if fact.predicate == "=":
+                    continue
+                
+                pred = fact.predicate.replace('-', '_').lower()
+                args_clean = [a.replace('-', '_').lower() for a in fact.args]
+                clean_fact_str = f"{pred}({','.join(args_clean)})".replace(" ", "")
+                
+
+                if clean_fact_str not in fdr_dynamic_atoms:
+                    args_str = ", ".join(args_clean)
+                    if args_str:
+                        asp_static_file.write(f"{pred}({args_str}).\n")
+                    else:
+                        asp_static_file.write(f"{pred}.\n")
 
     return sas_task
 
