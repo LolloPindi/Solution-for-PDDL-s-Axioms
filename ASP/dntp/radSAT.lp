@@ -1,5 +1,5 @@
 conn(X,Y) :- conn(Y,X), X != Y.
-
+close(X,Y) :- close(Y,X), X!= Y.
 
 %rc encoding
 rc(V,U) :- conn(V,U), close(V,U).

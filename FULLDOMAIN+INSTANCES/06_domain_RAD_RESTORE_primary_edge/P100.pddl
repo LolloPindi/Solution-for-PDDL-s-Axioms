@@ -5612,8 +5612,6 @@
 		(not (close S75 P104))
 		(not (close S95 S97))
 		(not (close S100 S102))
-		(RAD)
-		(RESTORE)
 	)
 )
 )

@@ -1635,8 +1635,6 @@
 		(not (close S9 S19))
 		(not (close S16 S44))
 		(not (close S33 S48))
-		(RAD)
-		(RESTORE)
 	)
 )
 )

@@ -1,4 +1,5 @@
 conn(X,Y) :- conn(Y,X), X != Y.
+close(X,Y) :- close(Y,X), X != Y.
 
 %RESTORE_primary (REST-p)
 rco_ex_s(V,U,V_d) :- 

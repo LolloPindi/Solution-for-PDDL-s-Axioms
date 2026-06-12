@@ -595,8 +595,6 @@
 		(not (close S7 S8))
 		(not (close S19 S20))
 		(not (close S21 S23))
-		(RAD)
-		(RESTORE)
 	)
 )
 )

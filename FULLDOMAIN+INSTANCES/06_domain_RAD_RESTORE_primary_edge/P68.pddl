@@ -2812,8 +2812,6 @@
 		(not (close S40 S41))
 		(not (close S49 S68))
 		(not (close S61 S64))
-		(RAD)
-		(RESTORE)
 	)
 )
 )

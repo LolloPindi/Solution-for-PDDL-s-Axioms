@@ -12191,8 +12191,6 @@
 		(not (close S93 S140))
 		(not (close S108 P154))
 		(not (close S122 P154))
-		(RAD)
-		(RESTORE)
 	)
 )
 )

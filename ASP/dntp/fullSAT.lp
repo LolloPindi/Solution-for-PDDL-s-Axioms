@@ -1,4 +1,5 @@
 conn(X,Y) :- conn(Y,X), X != Y.
+close(X,Y) :- close(Y,X), X != Y.
 
 %PART 1: RADIALITY (RAD)%
 

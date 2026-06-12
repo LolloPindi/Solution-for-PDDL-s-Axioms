@@ -249,8 +249,6 @@
 		(close S14 S15)
 		(not (close S4 S9))
 		(not (close S15 S16))
-		(RAD)
-		(RESTORE)
 	)
 )
 )

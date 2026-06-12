@@ -360,8 +360,6 @@
 		(not (close S5 S15))
 		(not (close S6 S19))
 		(not (close S7 S8))
-		(RAD)
-		(RESTORE)
 	)
 )
 )

@@ -137,8 +137,6 @@
 		(not (close S3 S6))
 		(not (close S4 S8))
 		(not (close S9 S11))
-		(RAD)
-		(RESTORE)
 	)
 )
 )

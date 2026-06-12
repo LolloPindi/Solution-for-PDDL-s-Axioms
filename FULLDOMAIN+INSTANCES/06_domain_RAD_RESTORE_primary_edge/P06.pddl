@@ -74,8 +74,7 @@
 		(close S6 P8)
 		(not (close S2 S4))
 		(not (close S3 S5))
-		(RAD)
-		(RESTORE)
+
 	)
 )
 )

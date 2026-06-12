@@ -1096,8 +1096,6 @@
 		(not (close S7 S26))
 		(not (close S14 S25))
 		(not (close S18 S23))
-		(RAD)
-		(RESTORE)
 	)
 )
 )
