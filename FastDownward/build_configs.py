@@ -7,6 +7,7 @@ minimal = ["-DCMAKE_BUILD_TYPE=Release", "-DDISABLE_LIBRARIES_BY_DEFAULT=YES"]
 
 #NEW: asp debug usage
 asp_debug = ["-DCMAKE_BUILD_TYPE=Debug", "-DUSE_ASP=YES"]
+asp_release = ["-DCMAKE_BUILD_TYPE=Release", "-DUSE_ASP=YES"]
 
 DEFAULT = "release"
 DEBUG = "debug"
