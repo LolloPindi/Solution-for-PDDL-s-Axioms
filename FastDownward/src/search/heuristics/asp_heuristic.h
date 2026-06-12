@@ -9,14 +9,22 @@
 //TODO[asp] change location (and maybe transform into a macro?)
 namespace {
     std::string ASP_TYPES_FILENAME = "instance_types.lp";
+    std::string ASP_STATIC_FACTS_FILENAME = "instance_static_facts.lp";
 }
 
 namespace asp_heuristic{
     class ASPHeuristic: public Heuristic {
             std::string lp_file;
             std::shared_ptr<Heuristic> heuristic;
-            Clingo::Control ctrl;
 
+            std::string static_facts;
+            std::vector<std::vector<std::string>> fact_by_value;
+
+            std::hash<std::string> hasher;
+            std::unordered_map<size_t, bool> cache_eval; 
+
+
+            //void evaluate(size_t hashed_key, std::string dynamic_facts);
         protected:
             virtual int compute_heuristic(const State &ancestor_state) override;
         public:
