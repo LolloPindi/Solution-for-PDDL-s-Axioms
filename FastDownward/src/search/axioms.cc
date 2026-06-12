@@ -19,53 +19,6 @@
 
 using namespace std;
 
-namespace {
-string read_file(const string &path) {
-    ifstream f(path);
-    if (!f)
-        throw runtime_error("[clingo] impossibile leggere: " + path);
-    stringstream ss;
-    ss << f.rdbuf();
-    return ss.str();
-}
-
-// "Atom conn(s10, p2)" -> "conn(s10,p2)" ; "Atom rad()" -> "rad"
-// "NegatedAtom ..." o "<none of those>" -> ""  (non emesso)
-string atom_to_asp(const string &factname) {
-    const string pref = "Atom ";
-    if (factname.rfind(pref, 0) != 0)
-        return "";
-    string body = factname.substr(pref.size());
-    string out;
-    out.reserve(body.size());
-    for (char c : body)
-        if (c != ' ')
-            out += c;
-    if (out.size() >= 2 && out.substr(out.size() - 2) == "()")
-        out = out.substr(0, out.size() - 2);
-    for (char &c : out)
-        c = (char)tolower((unsigned char)c);   // ASP: nomi minuscoli
-    return out;
-}
-
-// estrae le costanti-argomento da "edge(n1,n2)" -> {n1, n2}
-void collect_consts(const string &fact, set<string> &out) {
-    size_t l = fact.find('(');
-    if (l == string::npos)
-        return;
-    size_t r = fact.rfind(')');
-    string args = fact.substr(l + 1, r - l - 1);
-    size_t start = 0;
-    for (size_t i = 0; i <= args.size(); ++i) {
-        if (i == args.size() || args[i] == ',') {
-            string c = args.substr(start, i - start);
-            if (!c.empty())
-                out.insert(c);
-            start = i + 1;
-        }
-    }
-}
-}  // namespace
 
 AxiomEvaluator::AxiomEvaluator(const TaskProxy &task_proxy) {
     task_has_axioms = task_properties::has_axioms(task_proxy);
@@ -135,8 +88,6 @@ AxiomEvaluator::AxiomEvaluator(const TaskProxy &task_proxy) {
             else
                 default_values.emplace_back(-1);
         }
-
-        clingo_init(task_proxy);
     }
 }
 
@@ -195,110 +146,6 @@ void AxiomEvaluator::evaluate(vector<int> &state) {
             }
         }
     }
-
-    clingo_override(state);
-}
-
-void AxiomEvaluator::clingo_init(const TaskProxy &task_proxy) {
-    VariablesProxy variables = task_proxy.get_variables();
-    fact_by_value.resize(variables.size());
-
-    int dumped = 0;
-    for (VariableProxy var : variables) {
-        int id = var.get_id();
-        int dom = var.get_domain_size();
-
-        if (dumped < 4) {
-            cerr << "[clingo] var" << id << " fact0='"
-                 << var.get_fact(0).get_name() << "' derived="
-                 << var.is_derived() << endl;
-            ++dumped;
-        }
-
-        if (var.is_derived() && dom == 2) {
-            string aspname = atom_to_asp(var.get_fact(0).get_name());
-            if (!aspname.empty() && aspname.find('(') == string::npos) {
-                gate_var[aspname] = id;
-                continue;
-            }
-        }
-        fact_by_value[id].resize(dom);
-        for (int v = 0; v < dom; ++v)
-            fact_by_value[id][v] = atom_to_asp(var.get_fact(v).get_name());
-    }
-
-    
-    set<string> consts;
-    for (auto &vals : fact_by_value)
-        for (auto &f : vals)
-            if (!f.empty())
-                collect_consts(f, consts);
-    stringstream af;
-    for (auto &c : consts)
-        af << "node(" << c << ").";
-    auto_facts = af.str();
-
-    const char *evalp = getenv("DNTP_EVAL");
-    if (!evalp)
-        throw runtime_error("[clingo] env DNTP_EVAL non impostata");
-    eval_lp_text = read_file(evalp);
-    const char *factsp = getenv("DNTP_FACTS");
-    static_facts = factsp ? read_file(factsp) : "";
-
-    cerr << "[clingo] init ok: " << gate_var.size() << " gate {";
-    for (auto &g : gate_var)
-        cerr << " " << g.first;
-    cerr << " }, " << consts.size() << " nodi auto, encoding=" << evalp
-         << (factsp ? string(", facts=") + factsp : "") << endl;
-}
-
-void AxiomEvaluator::clingo_override(vector<int> &state) {
-    if (gate_var.empty())
-        return;
-
-    string facts, ckey;
-    for (size_t var = 0; var < fact_by_value.size(); ++var) {
-        if (fact_by_value[var].empty())
-            continue;
-        const string &f = fact_by_value[var][state[var]];
-        if (!f.empty()) {
-            facts += f + ".";
-            ckey += f + ";";
-        }
-    }
-
-    auto it = eval_cache.find(ckey);
-    if (it == eval_cache.end()) {
-        set<string> got;
-        bool sat = false;
-        try {
-            Clingo::Control ctl{};
-            string prog = eval_lp_text + "\n" + static_facts + "\n"
-                          + auto_facts + "\n" + facts;
-            ctl.add("base", {}, prog.c_str());
-            ctl.ground({{"base", {}}});
-            for (auto &m : ctl.solve()) {
-                sat = true;
-                for (auto &sym : m.symbols(Clingo::ShowType::Shown))
-                    got.insert(sym.name());
-                break;
-            }
-            if (!sat) {
-                cerr << "[clingo] UNSAT inatteso, NON poto. facts=" << facts << endl;
-                for (auto &g : gate_var)
-                    got.insert(g.first);
-            }
-        } catch (const exception &ex) {
-            cerr << "[clingo] errore (" << ex.what() << "), NON poto." << endl;
-            for (auto &g : gate_var)
-                got.insert(g.first);
-        }
-        it = eval_cache.emplace(ckey, move(got)).first;
-    }
-
-    const set<string> &truth = it->second;
-    for (const auto &g : gate_var)
-        state[g.second] = truth.count(g.first) ? 0 : 1;
 }
 
 PerTaskInformation<AxiomEvaluator> g_axiom_evaluators;

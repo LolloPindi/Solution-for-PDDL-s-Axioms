@@ -48,17 +48,6 @@ class AxiomEvaluator {
 
     template<typename Values, typename Accessor>
     void evaluate_aux(Values &values, const Accessor &accessor);
-
-    
-    std::vector<std::vector<std::string>> fact_by_value;
-    std::unordered_map<std::string, int> gate_var;
-    std::string eval_lp_text;
-    std::string static_facts;
-    std::string auto_facts;   
-    std::unordered_map<std::string, std::set<std::string>> eval_cache;
-
-    void clingo_init(const TaskProxy &task_proxy);
-    void clingo_override(std::vector<int> &state);
 public:
     explicit AxiomEvaluator(const TaskProxy &task_proxy);
 
