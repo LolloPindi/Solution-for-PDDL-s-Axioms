@@ -180,6 +180,7 @@ create_fast_downward_library(
         utils/task_lexer
         utils/timer
         utils/tuples
+        utils/asp_fact_converter
     CORE_LIBRARY
 )
 # On Linux, find the rt library for clock_gettime().
@@ -608,13 +609,12 @@ create_fast_downward_library(
     HELP "ASP-based heuristics"
     SOURCES
         heuristics/asp_heuristic
-    DEPENDS
-        heuristics        
-        search             
+    DEPENDS        
         task_properties
-)if(USE_ASP)
+)
+if(USE_ASP)
     find_package(Clingo REQUIRED)
-    if (CLINGO_FOUND)
+    if (Clingo_FOUND)
         if(TARGET libclingo)
             set(CLINGO_TGT libclingo)
         elseif(TARGET clingo)
@@ -623,9 +623,10 @@ create_fast_downward_library(
             set(CLINGO_TGT Clingo::libclingo)
         endif()
 
-        target_link_libraries(asp_solver PRIVATE ${CLINGO_TGT})
-        target_compile_definitions(asp_solver PRIVATE HAS_ASP)
-        target_sources(asp_solver PRIVATE heuristics/asp_heuristic.h heuristics/asp_heuristic.cc)
+        message(STATUS "Found Clingo: ${CLINGO_TGT}")
+        target_link_libraries(asp_solver INTERFACE ${CLINGO_TGT})
+        target_compile_definitions(asp_solver INTERFACE HAS_ASP)
+        target_sources(asp_solver INTERFACE heuristics/asp_heuristic.h heuristics/asp_heuristic.cc)
     else()
         message(FATAL_ERROR "Clingo not found.")
     endif()
