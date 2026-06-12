@@ -91,6 +91,11 @@ public:
     virtual bool does_cache_estimates() const override;
     virtual bool is_estimate_cached(const State &state) const override;
     virtual int get_cached_estimate(const State &state) const override;
+    
+    //TODO[asp] This is REALLY ugly and risky, but functional. It needs to be refactored!
+    int compute_heuristic_public(const State &s) {
+        return compute_heuristic(s);
+    }
 };
 
 extern void add_heuristic_options_to_feature(
