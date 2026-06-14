@@ -32,7 +32,7 @@ namespace asp_heuristic{
                     
                     TaskProxy task_proxy(*transform);
                     VariablesProxy vars = task_proxy.get_variables();
-
+                    
                     fact_by_value.resize(vars.size());
 
                     for (VariableProxy var : vars) {
@@ -64,20 +64,6 @@ namespace asp_heuristic{
                 ckey += asp_fact + ';';
             }
         }
-
-        /*
-        VariablesProxy vars = ancestor_state.get_task().get_variables();
-        for(VariableProxy var: vars){
-
-            FactProxy fact = ancestor_state[var.get_id()];
-            string asp_fact = utils::atom_to_asp(fact.get_name());
-
-            if (!asp_fact.empty()) {
-                dynamic_facts += asp_fact + ". ";
-                ckey += asp_fact + ';';
-            }
-        }
-        */
 
         size_t hashed_ckey = hasher(ckey);
         auto it = cache_eval.find(hashed_ckey);
@@ -124,8 +110,8 @@ namespace asp_heuristic{
         document_language_support("conditional effects", "supported");
         document_language_support("axioms", "supported");
 
-        document_property("admissible", "yes");
-        document_property("consistent", "no");
+        document_property("admissible", "depends on inner heuristics");
+        document_property("consistent", "depends on inner heuristics");
         document_property("safe", "yes");
         document_property("preferred operators", "no");
     }

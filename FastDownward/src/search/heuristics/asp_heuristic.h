@@ -18,8 +18,9 @@ namespace asp_heuristic{
             std::shared_ptr<Heuristic> heuristic;
 
             std::string static_facts;
-            std::vector<std::vector<std::string>> fact_by_value;
 
+            std::vector<std::vector<std::string>> fact_by_value;
+            
             std::hash<std::string> hasher;
             std::unordered_map<size_t, bool> cache_eval; 
 

@@ -616,9 +616,6 @@ def pddl_to_sas(task):
             if val_name.startswith("Atom "):
                 clean_atom = val_name[5:].replace(" ", "").lower().replace("-", "_")
                 fdr_dynamic_atoms.add(clean_atom)
-            elif val_name.startswith("NegatedAtom "):
-                clean_atom = val_name[12:].replace(" ", "").lower().replace("-", "_")
-                fdr_dynamic_atoms.add(clean_atom)
 
     with open(ASP_STATIC_FACTS_FILENAME, "w") as asp_static_file:        
         for fact in task.init:
