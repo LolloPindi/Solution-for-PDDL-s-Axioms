@@ -42,12 +42,13 @@ def main():
                 print(f"Remove intermediate file {args.sas_file}")
                 args.sas_file.unlink()
             
-            #TODO[asp] add agument "keep lp files" and transform into variables!
-            for asp_file in ("instance_types.lp", "instance_static_facts.lp"):
-                path = Path(asp_file)
-                if path.exists():
-                    print(f"Remove intermediate file {asp_file}")
-                    path.unlink()
+            if not args.keep_asp_files:
+                #TODO[asp] add agument "keep lp files" and transform into variables!
+                for asp_file in ("instance_types.lp", "instance_static_facts.lp"):
+                    path = Path(asp_file)
+                    if path.exists():
+                        print(f"Remove intermediate file {asp_file}")
+                        path.unlink()
                     
         elif component == "validate":
             (exitcode, continue_execution) = run_components.run_validate(args)
