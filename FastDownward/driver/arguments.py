@@ -426,6 +426,11 @@ def parse_args():
         "--keep-sas-file", action="store_true",
         help="keep translator output file (implied by --sas-file, default: "
             "delete file if translator and search component are active)")
+    
+    driver_other.add_argument(
+        "--keep-asp-files", action="store_true",
+        help="keep asp output file (default: "
+            "delete file if translator and search component are active)")
 
     driver_other.add_argument(
         "--portfolio", metavar="FILE", type=Path,
@@ -501,5 +506,6 @@ def parse_args():
         _set_components_and_inputs(parser, args)
         if "translate" not in args.components or "search" not in args.components:
             args.keep_sas_file = True
+            args.keep_asp_files = True
 
     return args
