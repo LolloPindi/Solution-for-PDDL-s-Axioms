@@ -180,7 +180,6 @@ create_fast_downward_library(
         utils/task_lexer
         utils/timer
         utils/tuples
-        utils/asp_fact_converter
     CORE_LIBRARY
 )
 # On Linux, find the rt library for clock_gettime().
@@ -604,15 +603,17 @@ if(USE_LP)
     endif()
 endif()
 
-create_fast_downward_library(
-    NAME asp_solver
-    HELP "ASP-based heuristics"
-    SOURCES
-        heuristics/asp_heuristic
-    DEPENDS        
-        task_properties
-)
 if(USE_ASP)
+    create_fast_downward_library(
+        NAME asp_solver
+        HELP "ASP-based heuristics"
+        SOURCES
+            heuristics/asp_heuristic
+            utils/asp_fact_converter
+        DEPENDS        
+            task_properties
+    )
+
     find_package(Clingo REQUIRED)
     if (Clingo_FOUND)
         if(TARGET libclingo)
@@ -631,7 +632,6 @@ if(USE_ASP)
         message(FATAL_ERROR "Clingo not found.")
     endif()
 endif()
-
 
 create_fast_downward_library(
     NAME relaxation_heuristic
