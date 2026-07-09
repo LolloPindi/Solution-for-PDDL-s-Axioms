@@ -1,3 +1,5 @@
+; PDDL domain problem: NO axioms integration. The axioms have been COMPLETELY moved into the ASP file.
+
 (define (domain dntp)
   (:requirements :strips :typing :equality :negative-preconditions :disjunctive-preconditions :conditional-effects :existential-preconditions)
   (:types

@@ -1,8 +1,0 @@
-(inss s1 s4)
-(inss s3 s5)
-(dels s4 s5)
-(inss s2 s4)
-(dels s1 s2)
-(sw s4 s3 s1)
-(dels s3 s4)
-; cost = 7 (unit cost)
