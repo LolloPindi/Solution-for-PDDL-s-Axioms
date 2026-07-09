@@ -1,3 +1,4 @@
+; NOTE: THIS FILE IS DEFINED SOLELY FOR TESTING PURPOSES. THE ACTUAL FILE IS domain_dntp_noaxioms
 (define (domain dntp)
   (:requirements :strips :typing :equality :negative-preconditions :disjunctive-preconditions :conditional-effects)
 
