@@ -8,7 +8,7 @@ DOM="$HERE/ASP/dntp/domain_dntp.pddl"
 INSTDIR="$HERE/FULLDOMAIN+INSTANCES/06_domain_RAD_RESTORE_primary_edge"
 ENCDIR="$HERE/ASP/dntp"
 PLANS="$HERE/Plans"
-TIMEOUT=600
+TIMEOUT=1200
 # --- carica config.env (percorsi Clingo) ---
 if [ -f "$HERE/config.env" ]; then
   set -a; . "$HERE/config.env"; set +a
@@ -38,14 +38,7 @@ search_config () {
 
 
 enc_file () {
-  case "$1" in
-    full|"")     echo "$ENCDIR/fullSAT.lp" ;;
-    rad)         echo "$ENCDIR/rad.lp" ;;
-    rest_p)      echo "$ENCDIR/rest_p.lp" ;;
-    rest_e)      echo "$ENCDIR/rest_e.lp" ;;
-    rad_rest_p)  echo "$ENCDIR/rad_rest_p.lp" ;;
-    *)           echo "$1" ;;   # path esplicito
-  esac
+  echo "$ENCDIR/fullSAT.lp"
 }
 
 usage () {
@@ -63,7 +56,6 @@ USO:
   dntp_run -h                     questo aiuto
 
 OPZIONI:
-  --enc <nome>     encoding ASP: full(default), rad, rest_p, rest_e, rad_rest_p, o path .lp
   --search <nome>  ricerca: ff(default), eager_ff, astar, astar_ff, wastar, blind
   --to <sec>       timeout per istanza (default $TIMEOUT)
 
@@ -82,7 +74,6 @@ while [ $i -lt ${#ARGS[@]} ]; do
     -l|--list) LIST=1 ;;
     --real)    SET="real" ;;
     --N)       SET="N" ;;
-    --enc)     i=$((i+1)); ENCN="${ARGS[$i]}" ;;
     --search)  i=$((i+1)); SEARCHN="${ARGS[$i]}" ;;
     --to)      i=$((i+1)); TIMEOUT="${ARGS[$i]}" ;;
     -all|--all) TARGET="-all" ;;
