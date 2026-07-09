@@ -92,6 +92,19 @@ This shows how to inject the ASP evaluator into the LAMA-First configuration, wo
   --search 'lazy_greedy ([hasp, hlm], preferred=[hasp,hlm], cost_type=one, reopen_closed=false)'
 ```
 
+### Executing on real problems
+The folders 'PDDL' and 'ASP' contain two problems that can be solved with the new architecture:
+- dntp problem: handles the distribution network transition problem
+- robot_simple: shows a simple problem where the axioms definition have been integrated in both ASP and PDDL files, enabling an hybrid axiomatic implementation
+
+Here is an example: the problem P30 has been executed on an ASP file containing every axioms (full)
+
+NOTE: for DNTP problems, use the `domain_dntp_noaxioms.pddl` domain file.
+
+```bash
+./fast-downward.py --build asp_debug ../PDDL/dntp/domain/domain_dntp_noaxioms.pddl ../PDDL/dntp/problem/P30.pddl   --search 'lazy_greedy([asp (ff(), "../ASP/dntp/full.lp")])'
+```
+
 ## Limitations
 * Only tested and supported on **Ubuntu 22.04** with **Clingo 5.x**; other platforms/versions are untested.
 * The `.lp` encoding itself can use any valid Clingo construct — disjunctive rules, choice rules, weak constraints, and optimization statements are all accepted and solved normally by Clingo. The limitation is on the **wrapper's interface**: only the SAT/UNSAT verdict is extracted and fed back to the planner as a pruning signal. Any optimization value Clingo computes internally is not currently propagated as a numeric heuristic estimate — see Roadmap.
