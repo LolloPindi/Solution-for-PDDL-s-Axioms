@@ -24,9 +24,8 @@ The integration lives at the build-system level rather than as a bolt-on script:
 ## Installation
 
 ### Requirements
-* **Operating System:** Ubuntu 22.04
+* **Operating System:** Debian/Ubuntu based
 * **ASP Solver:** Clingo 5.x
-* **Core Framework:** Fast Downward source code repository
 
 ### Compilation & Build Setup
 The Second Architecture elevates integration to the build-system level, natively extending Fast Downward's compilation scripts.
@@ -112,7 +111,7 @@ Future planned developments for this architecture include:
 We are open to contributions! If you want to make changes or test new domains, ensure that your additions strictly leverage Fast Downward's native `TypedFeature` plugin system to guarantee compile-time injection into the planner's global registry. Please make sure your contributions avoid introducing external environment variables or auxiliary shell scripts to maintain the architecture's self-contained nature.
 
 ## Authors and acknowledgment
-* **Thomas Garrafa** - Core Architect and Primary Developer of the Second Architecture.
+* **Thomas Garrafa** - Core Architect and Developer of the Second Architecture.
 * **Lorenzo Pindilli** - Testing and validating.
 
 ## License
