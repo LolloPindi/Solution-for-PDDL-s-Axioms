@@ -84,8 +84,49 @@ def get_build_path(config_name):
 
 def try_run(cmd):
     print(f'Executing command "{" ".join(cmd)}"')
+    
+    # 1. Copia l'ambiente di sistema corrente
+    custom_env = os.environ.copy()
+    
+    # --- BLOCCO RIMOZIONE CONDA ---
+    # Rimuove Miniconda dal PATH per evitare conflitti con i compilatori di sistema
+    if "PATH" in custom_env:
+        paths = custom_env["PATH"].split(os.pathsep)
+        # Filtra via qualsiasi percorso che contenga miniconda o anaconda
+        cleaned_paths = [p for p in paths if "miniconda" not in p.lower() and "anaconda" not in p.lower()]
+        custom_env["PATH"] = os.pathsep.join(cleaned_paths)
+    
+    # Disattiva le variabili d'ambiente specifiche che Conda inietta
+    custom_env.pop("CONDA_PREFIX", None)
+    custom_env.pop("CONDA_DEFAULT_ENV", None)
+    # ------------------------------
+
+    # 2. Cerca il file config.env nella root del progetto
+    env_file_path = os.path.join(get_project_root_path(), "config.env")
+    
+    if os.path.exists(env_file_path):
+        with open(env_file_path, "r") as f:
+            for line in f:
+                line = line.strip()
+                if not line or line.startswith("#"):
+                    continue
+                
+                if "=" in line:
+                    key, val = line.split("=", 1)
+                    key = key.strip()
+                    val = val.strip()
+                    
+                    # Forza CMake a usare ESCLUSIVAMENTE questi percorsi
+                    if key == "CLINGO_CMAKE":
+                        custom_env["Clingo_DIR"] = val
+                    elif key == "CLINGO_LIB":
+                        custom_env["CMAKE_PREFIX_PATH"] = val
+                    else:
+                        custom_env[key] = val
+
     try:
-        subprocess.check_call(cmd)
+        # 3. Passa l'ambiente pulito e modificato al sottoprocesso
+        subprocess.check_call(cmd, env=custom_env)
     except OSError as exc:
         if exc.errno == errno.ENOENT:
             print(f"Could not find '{cmd[0]}' on your PATH. For installation instructions, "
@@ -93,7 +134,6 @@ def try_run(cmd):
             sys.exit(1)
         else:
             raise
-
 def build(config_name, configure_parameters, build_parameters):
     print(f"Building configuration {config_name}.")
 

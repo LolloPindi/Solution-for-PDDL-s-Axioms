@@ -53,7 +53,7 @@ CLINGO_CMAKE=/home/XXX/clingo-system/lib/cmake/Clingo
 ### 3. Build Fast Downward
 ```bash
 cd FastDownward
-CLINGO_DIR=/home/XXX/clingo-system/lib/cmake/Clingo ./build.py release
+Clingo_DIR=/home/lollo/clingo-system/lib/cmake/Clingo ./build.py release
 cd ..
 ```
 
