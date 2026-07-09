@@ -35,9 +35,7 @@ The link code is in 'FastDownward/src/search/axioms.cc', in
 It serves Linux with the usual build tools (g++, cmake, make) and Python 3.
 
 The important part is Clingo. Must be compiled from source, not installed with conda
-or pip: those versions give linking problems with Fast Downward (we have
-hit his head, it's a libstdc++ ABI problem). You need headers,
-CMake library and package that match, and the only safe way is to compile it.
+or pip. The safe way is to compile it.
 
 ### 1. Compile Clingo
 
@@ -75,10 +73,6 @@ Clingo_DIR=/home/XXX/clingo-system/lib/cmake/Clingo ./build.py release
 cd ..
 ```
 
-When you see 'Built target downward' it's ready. The 'builds/' folder does not fit in the
-repo (it's huge and tied to the path where you created it), so this step goes
-redone every time you clone the project elsewhere.
-
 ## How to use it
 
 Everything goes from 'dntp_run'. Some examples:
@@ -95,9 +89,8 @@ Everything goes from 'dntp_run'. Some examples:
 You can choose the search algorithm and encoding:
 
 ```bash
-./dntp_run --real -all --search astar   # ricerca ottima, ma più lenta
-./dntp_run --real P13 --enc rad         # solo radialità
-./dntp_run --N N_22 --to 120            # timeout di 120s invece di 600
+./dntp_run --real -all --search astar   # algoritmo di ricerca
+./dntp_run --N N_22 --to 120            # timeout di 120s
 ```
 
 The available algorithms are `ff` (default), `eager_ff`, `eager_pref`, `lama`, `astar`, `astar_ff`, `wastar`, `blind`.
